@@ -22,4 +22,15 @@ export class ReportsController {
     this.reportsService.fs();
     return { message: 'finished' };
   }
+
+  @Post('async')
+  @HttpCode(201)
+  async generateAsync() {
+    try {
+      await this.reportsService.generateAll();
+    } catch (error) {
+      console.error('Report generation failed:', error);
+    }
+    return { message: 'finished' };
+  }
 }

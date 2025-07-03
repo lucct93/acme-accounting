@@ -1,0 +1,7 @@
+Metrics for 1 milion records
+SYNCHRONOUS API:
+  - Client waits: 3.19 seconds for response
+ASYNCHRONOUS API:
+  - Client waits: ~10ms for immediate response (202 Accepted)
+  - Processing continues for: 3.01 seconds in the background
+  - Client can check status via GET endpoint
