@@ -12,9 +12,9 @@ export class ReportsService {
   };
 
   state(scope: string) {
-    return this.states[scope];
+    return this.states[scope as keyof typeof this.states] || 'pending';
   }
-private ensureDirectoryExists(filePath: string): void {
+  private ensureDirectoryExists(filePath: string): void {
     const directory = path.dirname(filePath);
     if (!fs.existsSync(directory)) {
       fs.mkdirSync(directory, { recursive: true });
@@ -27,11 +27,14 @@ private ensureDirectoryExists(filePath: string): void {
       const tmpDir = 'tmp';
       const outputFile = 'out/accounts.csv';
       const accountBalances: Record<string, number> = {};
-      const files  = await fs.promises.readdir(tmpDir);
+      const files = await fs.promises.readdir(tmpDir);
 
-      for(const file of files) {
-        if(file.endsWith('.csv')) {
-          const content = await fs.promises.readFile(path.join(tmpDir, file), 'utf-8');
+      for (const file of files) {
+        if (file.endsWith('.csv')) {
+          const content = await fs.promises.readFile(
+            path.join(tmpDir, file),
+            'utf-8',
+          );
           const lines = content.trim().split('\n');
           for (const line of lines) {
             const [, account, , debit, credit] = line.split(',');
@@ -39,7 +42,7 @@ private ensureDirectoryExists(filePath: string): void {
               accountBalances[account] = 0;
             }
             accountBalances[account] +=
-                parseFloat(String(debit || 0)) - parseFloat(String(credit || 0));
+              parseFloat(String(debit || 0)) - parseFloat(String(credit || 0));
           }
         }
       }
@@ -52,9 +55,8 @@ private ensureDirectoryExists(filePath: string): void {
       await fs.promises.writeFile(outputFile, output.join('\n'));
       this.states.accounts = `finished in ${((performance.now() - start) / 1000).toFixed(2)}`;
       return true;
-    }
-    catch (error) {
-      this.states.accounts = `failed: ${error.message}`;
+    } catch (error: unknown) {
+      this.states.accounts = `failed: ${error instanceof Error ? error.message : String(error)}`;
       throw error;
     }
   }
@@ -68,12 +70,15 @@ private ensureDirectoryExists(filePath: string): void {
     try {
       this.ensureDirectoryExists(outputFile);
       const files = await fs.promises.readdir(tmpDir);
-      
+
       for (const file of files) {
         if (file.endsWith('.csv') && file !== 'yearly.csv') {
-          const content = await fs.promises.readFile(path.join(tmpDir, file), 'utf-8');
+          const content = await fs.promises.readFile(
+            path.join(tmpDir, file),
+            'utf-8',
+          );
           const lines = content.trim().split('\n');
-          
+
           for (const line of lines) {
             const [date, account, , debit, credit] = line.split(',');
             if (account === 'Cash') {
@@ -82,24 +87,25 @@ private ensureDirectoryExists(filePath: string): void {
                 cashByYear[year] = 0;
               }
               cashByYear[year] +=
-                parseFloat(String(debit || 0)) - parseFloat(String(credit || 0));
+                parseFloat(String(debit || 0)) -
+                parseFloat(String(credit || 0));
             }
           }
         }
       }
-      
+
       const output = ['Financial Year,Cash Balance'];
       Object.keys(cashByYear)
         .sort()
         .forEach((year) => {
           output.push(`${year},${cashByYear[year].toFixed(2)}`);
         });
-      
+
       await fs.promises.writeFile(outputFile, output.join('\n'));
       this.states.yearly = `finished in ${((performance.now() - start) / 1000).toFixed(2)}`;
       return true;
-    } catch (error) {
-      this.states.yearly = `failed: ${error.message}`;
+    } catch (error: unknown) {
+      this.states.yearly = `failed: ${error instanceof Error ? error.message : String(error)}`;
       throw error;
     }
   }
@@ -140,7 +146,7 @@ private ensureDirectoryExists(filePath: string): void {
         Equity: ['Common Stock', 'Retained Earnings'],
       },
     };
-    
+
     const balances: Record<string, number> = {};
     for (const section of Object.values(categories)) {
       for (const group of Object.values(section)) {
@@ -149,22 +155,26 @@ private ensureDirectoryExists(filePath: string): void {
         }
       }
     }
-    
+
     try {
       this.ensureDirectoryExists(outputFile);
       const files = await fs.promises.readdir(tmpDir);
-      
+
       for (const file of files) {
         if (file.endsWith('.csv') && file !== 'fs.csv') {
-          const content = await fs.promises.readFile(path.join(tmpDir, file), 'utf-8');
+          const content = await fs.promises.readFile(
+            path.join(tmpDir, file),
+            'utf-8',
+          );
           const lines = content.trim().split('\n');
 
           for (const line of lines) {
             const [, account, , debit, credit] = line.split(',');
 
-            if (balances.hasOwnProperty(account)) {
+            if (account in balances) {
               balances[account] +=
-                parseFloat(String(debit || 0)) - parseFloat(String(credit || 0));
+                parseFloat(String(debit || 0)) -
+                parseFloat(String(credit || 0));
             }
           }
         }
@@ -223,21 +233,17 @@ private ensureDirectoryExists(filePath: string): void {
       output.push(
         `Assets = Liabilities + Equity, ${totalAssets.toFixed(2)} = ${(totalLiabilities + totalEquity).toFixed(2)}`,
       );
-      
+
       await fs.promises.writeFile(outputFile, output.join('\n'));
       this.states.fs = `finished in ${((performance.now() - start) / 1000).toFixed(2)}`;
       return true;
-    } catch (error) {
-      this.states.fs = `failed: ${error.message}`;
+    } catch (error: unknown) {
+      this.states.fs = `failed: ${error instanceof Error ? error.message : String(error)}`;
       throw error;
     }
   }
 
   async generateAll() {
-    return Promise.all([
-      this.accounts(),
-      this.yearly(),
-      this.fs()
-    ]);
+    return Promise.all([this.accounts(), this.yearly(), this.fs()]);
   }
 }

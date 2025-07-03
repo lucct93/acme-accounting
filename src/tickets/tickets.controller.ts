@@ -1,5 +1,5 @@
 import { Body, ConflictException, Controller, Get, Post } from '@nestjs/common';
-import { Op, where } from 'sequelize';
+import { Op } from 'sequelize';
 import { Company } from '../../db/models/Company';
 import {
   Ticket,
@@ -34,18 +34,18 @@ export class TicketsController {
   async create(@Body() newTicketDto: newTicketDto) {
     const { type, companyId } = newTicketDto;
 
-    if(type === TicketType.registrationAddressChange) {
+    if (type === TicketType.registrationAddressChange) {
       const count = await Ticket.count({
         where: {
           type: TicketType.registrationAddressChange,
           companyId,
           status: {
-            [Op.ne]: TicketStatus.resolved
-          }
-        }
+            [Op.ne]: TicketStatus.resolved,
+          },
+        },
       });
-      if(count > 0) {
-        throw new ConflictException("Duplicated Ticket");
+      if (count > 0) {
+        throw new ConflictException('Duplicated Ticket');
       }
     }
 
@@ -81,19 +81,19 @@ export class TicketsController {
     });
 
     if (!assignees.length) {
-      // We have a rule that, if we cannot find a corporate secretary, assign it to the `Director` for registrationAddressChange type 
+      // We have a rule that, if we cannot find a corporate secretary, assign it to the `Director` for registrationAddressChange type
       // If there are multiple directors, throw an error.
       if (type === TicketType.registrationAddressChange) {
         const directors = await User.findAll({
           where: { companyId, role: UserRole.director },
         });
-        if(directors.length > 1) {
+        if (directors.length > 1) {
           throw new ConflictException(
             `No user with role ${userRole} and Multiple users with role ${UserRole.director}. Cannot create a ticket`,
           );
         }
 
-        if(directors.length === 1) {
+        if (directors.length === 1) {
           assignees = directors;
         } else {
           throw new ConflictException(
@@ -107,15 +107,17 @@ export class TicketsController {
       }
     }
 
-    if(assignees.length > 1) {
+    if (assignees.length > 1) {
       // Not sure why not UserRole.accountant?
-      if ([UserRole.corporateSecretary, UserRole.director].includes(userRole)) {
+      if (
+        userRole === UserRole.corporateSecretary ||
+        userRole === UserRole.director
+      ) {
         throw new ConflictException(
           `Multiple users with role ${userRole}. Cannot create a ticket`,
         );
       }
     }
-    
 
     const assignee = assignees[0];
 
@@ -127,17 +129,17 @@ export class TicketsController {
       status: TicketStatus.open,
     });
     // strikeOff is a specific ticket. If this kind of ticket created, should resolve all other tickets
-    if(type === TicketType.strikeOff) {
+    if (type === TicketType.strikeOff) {
       await Ticket.update(
         {
-          status: TicketStatus.resolved
+          status: TicketStatus.resolved,
         },
-        { 
+        {
           where: {
             companyId,
-            id: { [Op.ne]:  ticket.id},
-          }
-        }
+            id: { [Op.ne]: ticket.id },
+          },
+        },
       );
     }
 

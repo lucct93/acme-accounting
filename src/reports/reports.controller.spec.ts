@@ -47,7 +47,8 @@ describe('ReportsController', () => {
   describe('report', () => {
     it('should return the current state of all reports', () => {
       // Mock the state method to return different values for different reports
-      jest.spyOn(service, 'state')
+      jest
+        .spyOn(service, 'state')
         .mockReturnValueOnce('finished in 1.23s')
         .mockReturnValueOnce('processing')
         .mockReturnValueOnce('idle');
@@ -59,7 +60,7 @@ describe('ReportsController', () => {
         'yearly.csv': 'processing',
         'fs.csv': 'idle',
       });
-      expect(service.state).toHaveBeenCalledTimes(3);
+      expect(jest.spyOn(service, 'state')).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -74,8 +75,8 @@ describe('ReportsController', () => {
 
     it('should handle errors gracefully', () => {
       generateAllSpy.mockRejectedValue(new Error('Test error'));
-      
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      jest.spyOn(console, 'error').mockImplementation((): void => {});
 
       const result = controller.generate();
 
@@ -84,4 +85,4 @@ describe('ReportsController', () => {
       });
     });
   });
-}); 
+});

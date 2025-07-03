@@ -150,11 +150,6 @@ describe('TicketsController', () => {
 
       it('should prevent duplicate registrationAddressChange tickets for the same company', async () => {
         const company = await Company.create({ name: 'test' });
-        const user = await User.create({
-          name: 'Test User',
-          role: UserRole.corporateSecretary,
-          companyId: company.id,
-        });
 
         // Create first ticket successfully
         await controller.create({
@@ -168,11 +163,7 @@ describe('TicketsController', () => {
             companyId: company.id,
             type: TicketType.registrationAddressChange,
           }),
-        ).rejects.toEqual(
-          new ConflictException(
-            'Duplicated Ticket',
-          ),
-        );
+        ).rejects.toEqual(new ConflictException('Duplicated Ticket'));
       });
 
       it('should allow registrationAddressChange ticket creation after previous is resolved', async () => {
@@ -190,7 +181,7 @@ describe('TicketsController', () => {
 
         await Ticket.update(
           { status: TicketStatus.resolved },
-          { where: { id: firstTicket.id } }
+          { where: { id: firstTicket.id } },
         );
 
         const secondTicket = await controller.create({
@@ -364,14 +355,9 @@ describe('TicketsController', () => {
         ),
       );
     });
-    
+
     it('should resolve all other active tickets when a strikeOff ticket is created', async () => {
       const company = await Company.create({ name: 'test' });
-      const director = await User.create({
-        name: 'Test Director',
-        role: UserRole.director,
-        companyId: company.id,
-      });
       const secretary = await User.create({
         name: 'Test Secretary',
         role: UserRole.corporateSecretary,
@@ -404,8 +390,12 @@ describe('TicketsController', () => {
         type: TicketType.strikeOff,
       });
 
-      const updatedRegAddressTicket = await Ticket.findByPk(regAddressTicket.id);
-      const updatedMgmtReportTicket = await Ticket.findByPk(mgmtReportTicket.id);
+      const updatedRegAddressTicket = await Ticket.findByPk(
+        regAddressTicket.id,
+      );
+      const updatedMgmtReportTicket = await Ticket.findByPk(
+        mgmtReportTicket.id,
+      );
 
       expect(updatedRegAddressTicket).not.toBeNull();
       expect(updatedMgmtReportTicket).not.toBeNull();
@@ -415,11 +405,6 @@ describe('TicketsController', () => {
 
     it('should not affect already resolved tickets when a strikeOff ticket is created', async () => {
       const company = await Company.create({ name: 'test' });
-      const director = await User.create({
-        name: 'Test Director',
-        role: UserRole.director,
-        companyId: company.id,
-      });
       const secretary = await User.create({
         name: 'Test Secretary',
         role: UserRole.corporateSecretary,
@@ -448,24 +433,13 @@ describe('TicketsController', () => {
     it('should not resolve tickets from other companies', async () => {
       const company1 = await Company.create({ name: 'company1' });
       const company2 = await Company.create({ name: 'company2' });
-      
-      const director1 = await User.create({
-        name: 'Director 1',
-        role: UserRole.director,
-        companyId: company1.id,
-      });
-      const director2 = await User.create({
-        name: 'Director 2',
-        role: UserRole.director,
-        companyId: company2.id,
-      });
-      
+
       const secretary2 = await User.create({
         name: 'Secretary 2',
         role: UserRole.corporateSecretary,
         companyId: company2.id,
       });
-      
+
       const company2Ticket = await Ticket.create({
         type: TicketType.registrationAddressChange,
         companyId: company2.id,
@@ -473,12 +447,12 @@ describe('TicketsController', () => {
         category: TicketCategory.corporate,
         status: TicketStatus.open,
       });
-      
+
       await controller.create({
         companyId: company1.id,
         type: TicketType.strikeOff,
       });
-      
+
       // Verify company2's ticket is still open
       const updatedCompany2Ticket = await Ticket.findByPk(company2Ticket.id);
       expect(updatedCompany2Ticket).not.toBeNull();
