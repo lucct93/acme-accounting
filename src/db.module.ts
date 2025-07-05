@@ -4,10 +4,28 @@ import { SequelizeModuleOptions } from '@nestjs/sequelize/dist/interfaces/sequel
 import { Company } from '../db/models/Company';
 import { Ticket } from '../db/models/Ticket';
 import { User } from '../db/models/User';
-import dbConfig from '../db/config/config.json';
 
-const devConfig = dbConfig.development as SequelizeModuleOptions;
-const testConfig = dbConfig.test as SequelizeModuleOptions;
+require('dotenv').config();
+
+const devConfig: SequelizeModuleOptions = {
+  dialect: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT as string) || 5590,
+  username: process.env.DB_USERNAME || 'user',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'task-dev',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+};
+
+const testConfig: SequelizeModuleOptions = {
+  dialect: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT as string) || 5590,
+  username: process.env.DB_USERNAME || 'user',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_TEST_NAME || 'task-test',
+  logging: false,
+};
 
 const config = process.env.NODE_ENV === 'test' ? testConfig : devConfig;
 
