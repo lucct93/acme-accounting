@@ -1,7 +1,12 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Company } from '../../db/models/Company';
-import { Ticket, TicketCategory, TicketStatus, TicketType } from '../../db/models/Ticket';
+import {
+  Ticket,
+  TicketCategory,
+  TicketStatus,
+  TicketType,
+} from '../../db/models/Ticket';
 import { User, UserRole } from '../../db/models/User';
 import { DbModule } from '../db.module';
 import { TicketsService } from './tickets.service';
@@ -32,7 +37,7 @@ describe('TicketsService', () => {
   describe('findAll', () => {
     it('should return all tickets with company and user data', async () => {
       const company = await Company.create({ name: 'test' });
-      const user = await User.create({
+      await User.create({
         name: 'Test User',
         role: UserRole.accountant,
         companyId: company.id,
@@ -101,7 +106,9 @@ describe('TicketsService', () => {
             type: TicketType.managementReport,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Cannot find user with role accountant to create a ticket`),
+          new ConflictException(
+            `Cannot find user with role accountant to create a ticket`,
+          ),
         );
       });
     });
@@ -202,13 +209,15 @@ describe('TicketsService', () => {
             type: TicketType.registrationAddressChange,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Cannot find user with role corporateSecretary to create a ticket`),
+          new ConflictException(
+            `Cannot find user with role corporateSecretary to create a ticket`,
+          ),
         );
       });
 
       it('should prevent duplicate registrationAddressChange tickets for the same company', async () => {
         const company = await Company.create({ name: 'test' });
-        const user = await User.create({
+        await User.create({
           name: 'Test User',
           role: UserRole.corporateSecretary,
           companyId: company.id,
@@ -240,7 +249,10 @@ describe('TicketsService', () => {
           type: TicketType.registrationAddressChange,
         });
 
-        await Ticket.update({ status: TicketStatus.resolved }, { where: { id: firstTicket.id } });
+        await Ticket.update(
+          { status: TicketStatus.resolved },
+          { where: { id: firstTicket.id } },
+        );
 
         const secondTicket = await service.create({
           companyId: company.id,
@@ -291,7 +303,9 @@ describe('TicketsService', () => {
             type: TicketType.strikeOff,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Multiple users with role director. Cannot create a ticket`),
+          new ConflictException(
+            `Multiple users with role director. Cannot create a ticket`,
+          ),
         );
       });
 
@@ -304,18 +318,20 @@ describe('TicketsService', () => {
             type: TicketType.strikeOff,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Cannot find user with role director to create a ticket`),
+          new ConflictException(
+            `Cannot find user with role director to create a ticket`,
+          ),
         );
       });
 
       it('should resolve all other tickets when strikeOff is created', async () => {
         const company = await Company.create({ name: 'test' });
-        const director = await User.create({
+        await User.create({
           name: 'Test Director',
           role: UserRole.director,
           companyId: company.id,
         });
-        const secretary = await User.create({
+        await User.create({
           name: 'Test Secretary',
           role: UserRole.corporateSecretary,
           companyId: company.id,

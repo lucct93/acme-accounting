@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { SequelizeModuleOptions } from '@nestjs/sequelize/dist/interfaces/sequelize-options.interface';
+import { config as dotenvConfig } from 'dotenv';
 import { Company } from '../db/models/Company';
 import { Ticket } from '../db/models/Ticket';
 import { User } from '../db/models/User';
 
-require('dotenv').config();
+dotenvConfig();
 
 const devConfig: SequelizeModuleOptions = {
   dialect: 'postgres',

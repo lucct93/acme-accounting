@@ -1,7 +1,12 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Op } from 'sequelize';
 import { Company } from '../../db/models/Company';
-import { Ticket, TicketCategory, TicketStatus, TicketType } from '../../db/models/Ticket';
+import {
+  Ticket,
+  TicketCategory,
+  TicketStatus,
+  TicketType,
+} from '../../db/models/Ticket';
 import { User, UserRole } from '../../db/models/User';
 
 export interface newTicketDto {
@@ -89,18 +94,27 @@ export class TicketsService {
         if (directors.length === 1) {
           assignees = directors;
         } else {
-          throw new ConflictException(`Cannot find user with role ${userRole} to create a ticket`);
+          throw new ConflictException(
+            `Cannot find user with role ${userRole} to create a ticket`,
+          );
         }
       } else {
-        throw new ConflictException(`Cannot find user with role ${userRole} to create a ticket`);
+        throw new ConflictException(
+          `Cannot find user with role ${userRole} to create a ticket`,
+        );
       }
     }
 
     if (assignees.length > 1) {
       // For accountant role, take the most recent (last) one
       // For corporateSecretary and director roles, throw an error
-      if (userRole === UserRole.corporateSecretary || userRole === UserRole.director) {
-        throw new ConflictException(`Multiple users with role ${userRole}. Cannot create a ticket`);
+      if (
+        userRole === UserRole.corporateSecretary ||
+        userRole === UserRole.director
+      ) {
+        throw new ConflictException(
+          `Multiple users with role ${userRole}. Cannot create a ticket`,
+        );
       }
     }
 

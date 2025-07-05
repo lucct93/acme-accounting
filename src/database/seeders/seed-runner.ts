@@ -1,5 +1,10 @@
 import { Company } from '../../../db/models/Company';
-import { Ticket, TicketCategory, TicketStatus, TicketType } from '../../../db/models/Ticket';
+import {
+  Ticket,
+  TicketCategory,
+  TicketStatus,
+  TicketType,
+} from '../../../db/models/Ticket';
 import { User, UserRole } from '../../../db/models/User';
 
 export class SeedRunner {
@@ -26,18 +31,33 @@ export class SeedRunner {
 
     const users = [
       { id: 1, name: 'John Smith', role: UserRole.accountant, companyId: 1 },
-      { id: 2, name: 'Sarah Wilson', role: UserRole.corporateSecretary, companyId: 1 },
+      {
+        id: 2,
+        name: 'Sarah Wilson',
+        role: UserRole.corporateSecretary,
+        companyId: 1,
+      },
       { id: 3, name: 'Michael Johnson', role: UserRole.director, companyId: 1 },
 
       { id: 4, name: 'Emily Chen', role: UserRole.accountant, companyId: 2 },
       { id: 5, name: 'David Rodriguez', role: UserRole.director, companyId: 2 },
 
-      { id: 6, name: 'Lisa Anderson', role: UserRole.corporateSecretary, companyId: 3 },
+      {
+        id: 6,
+        name: 'Lisa Anderson',
+        role: UserRole.corporateSecretary,
+        companyId: 3,
+      },
       { id: 7, name: 'Robert Brown', role: UserRole.accountant, companyId: 3 },
       { id: 8, name: 'Jennifer Davis', role: UserRole.director, companyId: 3 },
 
       { id: 9, name: 'Mark Thompson', role: UserRole.accountant, companyId: 4 },
-      { id: 10, name: 'Jessica Miller', role: UserRole.accountant, companyId: 4 },
+      {
+        id: 10,
+        name: 'Jessica Miller',
+        role: UserRole.accountant,
+        companyId: 4,
+      },
       { id: 11, name: 'Alex Turner', role: UserRole.director, companyId: 4 },
 
       { id: 12, name: 'Rachel Green', role: UserRole.director, companyId: 5 },

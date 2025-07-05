@@ -1,7 +1,12 @@
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Company } from '../../db/models/Company';
-import { Ticket, TicketCategory, TicketStatus, TicketType } from '../../db/models/Ticket';
+import {
+  Ticket,
+  TicketCategory,
+  TicketStatus,
+  TicketType,
+} from '../../db/models/Ticket';
 import { User, UserRole } from '../../db/models/User';
 import { DbModule } from '../db.module';
 import { TicketsController } from './tickets.controller';
@@ -85,7 +90,9 @@ describe('TicketsController', () => {
             type: TicketType.managementReport,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Cannot find user with role accountant to create a ticket`),
+          new ConflictException(
+            `Cannot find user with role accountant to create a ticket`,
+          ),
         );
       });
     });
@@ -143,7 +150,9 @@ describe('TicketsController', () => {
             type: TicketType.registrationAddressChange,
           }),
         ).rejects.toEqual(
-          new ConflictException(`Cannot find user with role corporateSecretary to create a ticket`),
+          new ConflictException(
+            `Cannot find user with role corporateSecretary to create a ticket`,
+          ),
         );
       });
 
@@ -185,7 +194,10 @@ describe('TicketsController', () => {
         });
 
         // Resolve the first ticket
-        await Ticket.update({ status: TicketStatus.resolved }, { where: { id: firstTicket.id } });
+        await Ticket.update(
+          { status: TicketStatus.resolved },
+          { where: { id: firstTicket.id } },
+        );
 
         // Should be able to create new ticket after first is resolved
         const secondTicket = await controller.create({
@@ -357,7 +369,9 @@ describe('TicketsController', () => {
           type: TicketType.strikeOff,
         }),
       ).rejects.toEqual(
-        new ConflictException(`Cannot find user with role ${UserRole.director} to create a ticket`),
+        new ConflictException(
+          `Cannot find user with role ${UserRole.director} to create a ticket`,
+        ),
       );
     });
 
@@ -403,8 +417,12 @@ describe('TicketsController', () => {
       });
 
       // Verify other tickets are now resolved
-      const updatedRegAddressTicket = await Ticket.findByPk(regAddressTicket.id);
-      const updatedMgmtReportTicket = await Ticket.findByPk(mgmtReportTicket.id);
+      const updatedRegAddressTicket = await Ticket.findByPk(
+        regAddressTicket.id,
+      );
+      const updatedMgmtReportTicket = await Ticket.findByPk(
+        mgmtReportTicket.id,
+      );
 
       expect(updatedRegAddressTicket).not.toBeNull();
       expect(updatedMgmtReportTicket).not.toBeNull();

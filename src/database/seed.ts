@@ -21,11 +21,20 @@ async function bootstrap() {
         await SeedRunner.seedAll();
         break;
     }
-  } catch (error) {
+  } catch (err: unknown) {
+    console.error(
+      `seeding data with error ${err instanceof Error ? err.message : String(err)}`,
+    );
     process.exit(1);
   } finally {
     await app.close();
   }
 }
 
-bootstrap();
+bootstrap()
+  .then(() => {
+    console.log('App started successful!');
+  })
+  .catch((error: Error) => {
+    console.log(`App exited with error ${error.message}`);
+  });
