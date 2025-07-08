@@ -1,36 +1,26 @@
 import { Test } from '@nestjs/testing';
-import { DestroyOptions } from 'sequelize';
-import { Model, ModelCtor } from 'sequelize-typescript';
-import { Company } from '../../db/models/Company';
-import { Ticket } from '../../db/models/Ticket';
-import { User } from '../../db/models/User';
+import { Sequelize } from 'sequelize-typescript';
 import { DbModule } from '../db.module';
 
-beforeEach(async () => {
-  jest.restoreAllMocks();
-  await cleanTables();
-});
+let sequelize: Sequelize;
 
-export async function cleanTables() {
-  await Test.createTestingModule({
+beforeAll(async () => {
+  const moduleRef = await Test.createTestingModule({
     imports: [DbModule],
   }).compile();
 
-  const models: ModelCtor<Model>[] = [Ticket, User, Company];
-  for (const model of models) {
-    await cleanTable(model);
-  }
+  sequelize = moduleRef.get<Sequelize>(Sequelize);
+});
 
-  async function cleanTable<T extends Model>(model: ModelCtor<T>) {
-    const options: DestroyOptions = {
-      where: {},
-    };
-    try {
-      await model.unscoped().destroy(options);
-    } catch (err) {
-      // https://github.com/sequelize/sequelize/issues/14807
-      console.error(err as Error);
-      throw err;
-    }
+beforeEach(async () => {
+  if (!sequelize) return;
+  await sequelize.query('DELETE FROM "tickets"');
+  await sequelize.query('DELETE FROM "users"');
+  await sequelize.query('DELETE FROM "companies"');
+});
+
+afterAll(async () => {
+  if (sequelize) {
+    await sequelize.close();
   }
-}
+});
